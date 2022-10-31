@@ -1,1 +1,1 @@
-# inf_sis_third_semestr_project
+# infsis_third_semestr_project
