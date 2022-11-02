@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {# переменные из контекста используем с двойными фигурными скобками #}
+    <h1>{{ title }}</h1>
+    <div>
+        <p>{{ product.description }}</p>
+        <p>{{ product.price }}</p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="navbar-item">Назад</a>
+{% endblock %}

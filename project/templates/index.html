@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for product in products %}
+        <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=product.id) }}'">
+        <p>{{ product.name | upper() }}</p>
+        <p>{{ product.description | truncate(30) }}</p>
+        <p>{{ product.price }}</p>
+        </div>
+    {% endfor %}
+{% endblock %}
+
