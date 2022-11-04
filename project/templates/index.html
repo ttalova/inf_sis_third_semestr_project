@@ -3,10 +3,19 @@
 {% block content %}
     {% for product in products %}
         <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=product.id) }}'">
-        <p>{{ product.name | upper() }}</p>
-        <p>{{ product.description | truncate(30) }}</p>
-        <p>{{ product.price }}</p>
+            <p>{{ product.name | upper() }}</p>
+            <p>{{ product.description | truncate(30) }}</p>
+            <p>{{ product.price }}</p>
+            {% if product.id not in exist %}
+                <a href="{{ url_for('add_to_shopping_cart', product_id=product.id) }}" class="navbar-item">Добавить в
+                    корзину</a>
+            {% else %}
+                <a href="{{ url_for('delete_from_shopping_cart', product_id=product.id) }}" class="navbar-item">Удалить из
+                    корзины</a>
+            {% endif %}
+        <p>{{ product.id in exist }}</p>
         </div>
+
     {% endfor %}
 {% endblock %}
 
