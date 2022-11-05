@@ -13,7 +13,15 @@
                 <a href="{{ url_for('delete_from_shopping_cart', product_id=product.id) }}" class="navbar-item">Удалить из
                     корзины</a>
             {% endif %}
-        <p>{{ product.id in exist }}</p>
+
+        {% if product.id not in exist_favorites %}
+                <a href="{{ url_for('add_to_favorites', product_id=product.id) }}" class="navbar-item">Добавить в
+                    избранное</a>
+            {% else %}
+                <a href="{{ url_for('delete_from_favorites', product_id=product.id) }}" class="navbar-item">Удалить из
+                    избранного</a>
+            {% endif %}
+
         </div>
 
     {% endfor %}

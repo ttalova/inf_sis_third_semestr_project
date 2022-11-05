@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form>
+        <h2>Адрес и доставка</h2>
+        <label for="city"><i class="fa fa-institution"></i> Город</label>
+        <input type="text" id="city" name="city" placeholder="New York">
+        <label for="adr"><i class="fa fa-address-card-o"></i> Адрес</label>
+        <input type="text" id="adr" name="address" placeholder="542 W. 15th Street">
+        <label>
+            <input type="checkbox" checked="checked" name="sameadr" required> Оплата курьером с оплатой при получении</label>
+
+        <br>
+        <h2>Получатель</h2>
+        <label for="fname"><i class="fa fa-user"></i> Фамилия</label>
+        <input type="text" id="fname" name="firstname" placeholder="Иванов">
+        <label for="fname"><i class="fa fa-user"></i> Имя</label>
+        <input type="text" id="fname" name="firstname" placeholder="Иван">
+        <label for="fname"><i class="fa fa-user"></i> Отчество</label>
+        <input type="text" id="fname" name="firstname" placeholder="Иванович">
+        <label for="email"><i class="fa fa-envelope"></i> Email</label>
+        <input type="text" id="email" name="email" placeholder="john@example.com">
+    <br>
+    <input type="submit" value="Заказать" class="btn">
+    </form>
+{% endblock %}
+

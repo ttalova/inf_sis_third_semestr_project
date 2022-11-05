@@ -2,7 +2,6 @@ from flask import Flask, redirect, url_for, render_template, request, make_respo
 import datetime
 from db_util import Database
 
-
 app = Flask(__name__)
 app.secret_key = '111'
 # необходимо добавлять, чтобы время сессии не ограничивалось закрытием браузера
@@ -10,6 +9,7 @@ app.permanent_session_lifetime = datetime.timedelta(days=365)
 
 # инициализация класса с методами для работы с БД
 db = Database()
+
 
 @app.route('/products', methods=['GET', 'POST'])
 def index():
@@ -27,11 +27,15 @@ def index():
     else:
         exist = session['shopping_cart']
 
+    if 'favorites' not in session:
+        exist_favorites = []
+    else:
+        exist_favorites = session['favorites']
+
     if 'email' in session:
         user = session['email']
     else:
         user = None
-
 
     # if rating:
     #     films = [x for x in films if float(x['rating']) >= float(rating)]
@@ -48,7 +52,8 @@ def index():
         'brand': brand,
         'country': country,
         'exist': exist,
-        'user': user
+        'user': user,
+        'exist_favorites': exist_favorites
     }
     # возвращаем сгенерированный шаблон с нужным нам контекстом
     return render_template("index.html", **context)
@@ -65,6 +70,7 @@ def get_product(product_id):
     # если нужный фильм не найден, возвращаем шаблон с ошибкой
     return render_template("error.html", error="Такого товара не существует")
 
+
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
     message = None
@@ -72,11 +78,12 @@ def signup():
         user = db.select(f"SELECT * FROM mail_user WHERE mail_user.email = '{request.form.get('email')}'")
         if not user:
             db.insert(
-                    f"INSERT INTO mail_user (name, email, password) VALUES ('{request.form.get('name')}', '{request.form.get('email')}', '{request.form.get('password')}')")
+                f"INSERT INTO mail_user (name, email, password) VALUES ('{request.form.get('name')}', '{request.form.get('email')}', '{request.form.get('password')}')")
             message = 'Вы успешно зарегистрированы'
         else:
             message = 'Исправьте ошибки'
     return render_template("signup.html", message=message)
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -92,15 +99,18 @@ def login():
             message = 'Неправильный логин или пароль'
     return render_template("login.html", message=message)
 
+
 @app.route('/profile')
 def profile():
     user = user_logining()
     return render_template('profile.html', user=user)
 
+
 @app.route('/logout')
 def logout():
     session.pop('email', None)
     return redirect(url_for("index"))
+
 
 @app.route('/add_to_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def add_to_shopping_cart(product_id):
@@ -116,7 +126,8 @@ def add_to_shopping_cart(product_id):
         session.modified = True
 
     user = user_logining()
-    return redirect(url_for("index", exist = exist, user = user))
+    return redirect(url_for("index", exist=exist, user=user))
+
 
 @app.route('/delete_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def delete_from_shopping_cart(product_id):
@@ -130,7 +141,7 @@ def delete_from_shopping_cart(product_id):
     if not session.modified:
         session.modified = True
     user = user_logining()
-    return redirect(url_for("index", exist = exist, user=user))
+    return redirect(url_for("index", exist=exist, user=user))
 
 
 @app.route('/shopping_cart', methods=['GET', 'POST'])
@@ -139,9 +150,19 @@ def shopping_cart():
     if 'shopping_cart' in session:
         prods = '(' + str(session['shopping_cart'])[1:-1] + ')'
         products = db.select(f"SELECT * FROM product WHERE id IN {prods}")
+        total_price = db.select(f"SELECT sum(price) FROM product WHERE id IN {prods}")
+        if 'total_price' in session:
+            session['total_price'] = total_price['sum']
+            if not session.modified:
+                session.modified = True
+        else:
+            session.pop('total_price', None)
+
+        print(total_price)
         if type(products) == dict:
             products = [products]
     else:
+        total_price = None
         products = None
         message = 'Корзина пуста'
     user = user_logining()
@@ -149,10 +170,89 @@ def shopping_cart():
         'title': 'Корзина',
         'products': products,
         'message': message,
+        'user': user,
+        'total_price': total_price
+    }
+
+
+    return render_template("shopping_cart.html", **context)
+
+
+@app.route('/add_to_favorites/<int:product_id>', methods=['GET', 'POST'])
+def add_to_favorites(product_id):
+    exist = False
+    if 'favorites' in session:
+        if product_id in session['favorites']:
+            exist = True
+        else:
+            session['favorites'].append(product_id)
+    else:
+        session['favorites'] = [product_id]
+    if not session.modified:
+        session.modified = True
+
+    user = user_logining()
+    return redirect(url_for("index", exist=exist, user=user))
+
+
+@app.route('/delete_favorites/<int:product_id>', methods=['GET', 'POST'])
+def delete_from_favorites(product_id):
+    exist = True
+    if 'favorites' in session:
+        if product_id in session['favorites']:
+            exist = False
+            session['favorites'].remove(product_id)
+    if len(session['favorites']) == 0:
+        session.pop('favorites', None)
+    if not session.modified:
+        session.modified = True
+    user = user_logining()
+    return redirect(url_for("index", exist=exist, user=user))
+
+
+@app.route('/favorites', methods=['GET', 'POST'])
+def favorites():
+    message = False
+    if 'favorites' in session:
+        prods = '(' + str(session['favorites'])[1:-1] + ')'
+        products = db.select(f"SELECT * FROM product WHERE id IN {prods}")
+        if type(products) == dict:
+            products = [products]
+    else:
+        products = None
+        message = 'В избранном ничего нет'
+    user = user_logining()
+    context = {
+        'title': 'Избранное',
+        'products': products,
+        'message': message,
         'user': user
     }
 
-    return render_template("shopping_cart.html", **context)
+    return render_template("favorites.html", **context)
+
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    message = None
+    if request.method == 'POST':
+        order = request.form
+        user_email = session['email']
+        order_data = datetime.datetime.now()
+        total_price = session['total_price']
+        products = session['shopping_cart']
+        if order:
+            print(11111)
+            db.insert(
+                f"INSERT INTO user_order (mail_user, order_data, total_price, product) VALUES ({user_email}, '{order_data}', '{total_price}', '{products}')")
+            message = 'Заказ успешно оформлен'
+        else:
+            print(2222)
+            message = 'Произошла ошибка'
+        print(order_data)
+    return render_template('checkout.html', message=message)
+
+
 
 def user_logining():
     if 'email' in session:
@@ -160,5 +260,7 @@ def user_logining():
     else:
         user = None
     return user
+
+
 if __name__ == '__main__':
     app.run(port=9000, debug=True, host='localhost')

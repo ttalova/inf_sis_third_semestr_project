@@ -11,10 +11,6 @@
         <p>{{ product.price }}</p>
         </div>
     {% endfor %}
-        <h1>Итого: {{ total_price.sum }}</h1>
-        <a href="{{ url_for('checkout') }}" class="navbar-item">Оформить заказ</a>
     {% endif %}
-
-
 {% endblock %}
 
