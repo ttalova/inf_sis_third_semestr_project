@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if message %}
+        <p>{{ message }}</p>
+    {% else %}
+        {% for product, order_data in products %}
+            <p>----------------</p>
+            <h2>{{ order_data }}</h2>
+            {% for prod in product %}
+                <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=prod.id) }}'">
+                    <p>{{ prod.id | upper() }}</p>
+                    <p>{{ prod.description }}</p>
+                    <p>{{ prod.price }}</p>
+                </div>
+            {% endfor %}
+            <p>----------------</p>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+

@@ -38,6 +38,9 @@
                                 Вход
                             </a>
                         {% else %}
+                            <a href="{{ url_for('orders') }}" class="navbar-item">
+                                Заказы
+                            </a>
                             <a href="{{ url_for('logout') }}" class="navbar-item">
                                 Выход
                             </a>

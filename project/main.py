@@ -11,7 +11,7 @@ app.permanent_session_lifetime = datetime.timedelta(days=365)
 db = Database()
 
 
-@app.route('/products', methods=['GET', 'POST'])
+@app.route('/products')
 def index():
     products = db.select(f"SELECT * FROM product")
     id = request.args.get("id")
@@ -151,12 +151,10 @@ def shopping_cart():
         prods = '(' + str(session['shopping_cart'])[1:-1] + ')'
         products = db.select(f"SELECT * FROM product WHERE id IN {prods}")
         total_price = db.select(f"SELECT sum(price) FROM product WHERE id IN {prods}")
-        if 'total_price' in session:
-            session['total_price'] = total_price['sum']
-            if not session.modified:
-                session.modified = True
-        else:
-            session.pop('total_price', None)
+
+        session['total_price'] = total_price['sum']
+        if not session.modified:
+            session.modified = True
 
         print(total_price)
         if type(products) == dict:
@@ -173,7 +171,6 @@ def shopping_cart():
         'user': user,
         'total_price': total_price
     }
-
 
     return render_template("shopping_cart.html", **context)
 
@@ -244,13 +241,45 @@ def checkout():
         if order:
             print(11111)
             db.insert(
-                f"INSERT INTO user_order (mail_user, order_data, total_price, product) VALUES ({user_email}, '{order_data}', '{total_price}', '{products}')")
+                f"INSERT INTO user_order (mail_user, order_data, order_time, total_price, product) VALUES ('{user_email}', '{order_data}', '{order_data}', '{total_price}', '{products}')")
+            session.pop('total_price', None)
+            session.pop('shopping_cart', None)
             message = 'Заказ успешно оформлен'
         else:
             print(2222)
             message = 'Произошла ошибка'
         print(order_data)
-    return render_template('checkout.html', message=message)
+    return render_template("checkout.html", message=message)
+
+
+@app.route('/orders')
+def orders():
+    user_in = str(session['email'])
+    products_list = db.select(f"SELECT order_data, order_time, product FROM user_order WHERE mail_user='{user_in}'")
+    message = None
+    if products_list:
+        products = []
+        order_datas = []
+        if type(products_list) == dict:
+            products_list = [products_list]
+        for product_order in products_list:
+            order_data = product_order['order_data']
+            order_time = product_order['order_time']
+            order_datas.append(str(order_data) + ' ' + str(order_time).split('.')[0][:-3])
+            product_order = product_order['product'][1:-1].split(',')
+            products_from_bd = []
+            for product in product_order:
+                product = product
+                prods = db.select(f"SELECT * FROM product WHERE id='{product}'")
+                products_from_bd.append(prods)
+            products.append(products_from_bd)
+    else:
+        message = 'Вы еще ничего не заказали'
+        products = [None]
+        order_datas = [None]
+    user = user_logining()
+    return render_template('orders.html', message=message, products=zip(products, order_datas), user=user)
+
 
 
 
@@ -260,6 +289,7 @@ def user_logining():
     else:
         user = None
     return user
+
 
 
 if __name__ == '__main__':

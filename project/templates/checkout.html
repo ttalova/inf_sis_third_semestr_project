@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <form>
+    <form method="post">
         <h2>Адрес и доставка</h2>
         <label for="city"><i class="fa fa-institution"></i> Город</label>
         <input type="text" id="city" name="city" placeholder="New York">
@@ -22,6 +22,10 @@
         <input type="text" id="email" name="email" placeholder="john@example.com">
     <br>
     <input type="submit" value="Заказать" class="btn">
+    <br>
+    {% if message %}
+    <p>{{ message }}</p>
+    {% endif %}
     </form>
 {% endblock %}
 
