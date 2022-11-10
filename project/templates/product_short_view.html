@@ -1,0 +1,79 @@
+{% block short_view %}
+    {% if  products %}
+        {% for product, quanti in products %}
+            <div class="sec">
+                <p>{{ product.short_description }}</p>
+                <p onclick="location.href = '{{ url_for("get_product", product_id=product.id) }}'">{{ product.name | upper() }}</p>
+                <p>{{ product.price }}</p>
+{#                {% if orders_exist %}#}
+{#                    <div class="input-group quantity_goods">#}
+{#                        <form method="post" action="" name="{{ product.id }}">#}
+{#                            <input type="number" name="quantity_order" title="Qty" value="{{ quanti }}" step='1' min="1" max="{{ product.quantity }}">#}
+{#                        </form>#}
+{#                    </div>#}
+{#                {% endif %}#}
+                {% if not orders_exist %}
+                    {% if product.id not in exist.shopping_cart %}
+                        <a href="{{ url_for('add_to_shopping_cart', product_id=product.id, site=site) }}"
+                           class="navbar-item">Добавить
+                            в
+                            корзину</a>
+                    {% else %}
+                        <a href="{{ url_for('delete_from_shopping_cart', product_id=product.id, site=site) }}"
+                           class="navbar-item">Удалить
+                            из
+                            корзины</a>
+                    {% endif %}
+
+                    {% if product.id not in exist.favorites %}
+                        <a href="{{ url_for('add_to_favorites', product_id=product.id, site=site) }}"
+                           class="navbar-item">Добавить
+                            в
+                            избранное</a>
+                    {% else %}
+                        <a href="{{ url_for('delete_from_favorites', product_id=product.id, site=site) }}"
+                           class="navbar-item">Удалить
+                            из
+                            избранного</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+        {% endfor %}
+    {% endif %}
+{#    <script src="http://code.jquery.com/jquery-3.2.1.js"></script>#}
+{#    <script>#}
+{#        $('#button_plus').on('click', function () {#}
+{#            // обрабатываем полученные данные с инпутов#}
+{#            // ajax-запрос#}
+{#            $.ajax({#}
+{#                url: '{{ url_for('checkout') }}', // добавляем url, откуда будем брать данные#}
+{#                method: 'get', // указываем метод#}
+{#                dataType: 'html', // тип данных#}
+{#                data: data, // данные запроса (в данном случае, там находятся GET-параметры)#}
+{#                // функция, которая вызывается при успешном получении данных#}
+{#                success: function () {#}
+{#                    var numCount = document.getElementById('num_count');#}
+{#                    #}
+{#                    var plusBtn = document.getElementById('button_plus');#}
+{#                    var minusBtn = document.getElementById('button_minus');#}
+{#                    var maxElement = document.getElementById("num_count").getAttribute("max");#}
+{#                    plusBtn.onclick = function () {#}
+{#                        var qty = parseInt(numCount.value);#}
+{#                        if (qty < maxElement) {#}
+{#                            qty = qty + 1;#}
+{#                        }#}
+{#                        numCount.value = qty;#}
+{#                    }#}
+{#                    minusBtn.onclick = function () {#}
+{#                        var qty = parseInt(numCount.value);#}
+{#                        if (qty > 1) {#}
+{#                            qty = qty - 1;#}
+{#                        }#}
+{#                        numCount.value = qty;#}
+{#                    }#}
+{#                }#}
+{#            })#}
+{#        })#}
+{#    </script>#}
+{% endblock %}

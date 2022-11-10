@@ -21,16 +21,13 @@
                         <a href="{{ url_for('index') }}" class="navbar-item">
                             platinum pear
                         </a>
-                        <a href="{{ url_for('profile') }}" class="navbar-item">
-                            Profile
-                        </a>
                         <a href="{{ url_for('shopping_cart') }}" class="navbar-item">
-                                Корзина
-                            </a>
-                    <a href="{{ url_for('favorites') }}" class="navbar-item">
-                                Избранное
-                            </a>
-                        {% if not user %}
+                            Корзина
+                        </a>
+                        <a href="{{ url_for('favorites') }}" class="navbar-item">
+                            Избранное
+                        </a>
+                        {% if user %}
                             <a href="{{ url_for('signup') }}" class="navbar-item">
                                 Регистрация
                             </a>
@@ -38,6 +35,9 @@
                                 Вход
                             </a>
                         {% else %}
+                            <a href="{{ url_for('profile') }}" class="navbar-item">
+                                Profile
+                            </a>
                             <a href="{{ url_for('orders') }}" class="navbar-item">
                                 Заказы
                             </a>
@@ -45,7 +45,17 @@
                                 Выход
                             </a>
                         {% endif %}
-
+                    {% if request.session['admin'] %}
+                        <a href="{{ url_for('add_product') }}" class="navbar-item">
+                                Добавить товар
+                            </a>
+                    {% endif %}
+                        <form class="form-inline my-2 my-lg-0" action="" method="post">
+                            <input value="{{ search | default(default_value = '', boolean = False) }}"
+                                   class="form-control mr-sm-2" name="search" type="text"
+                                   placeholder="Поиск..." aria-label="Search">
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -60,5 +70,24 @@
     </div>
 </section>
 </body>
-
+{#<script>#}
+{#    var numCount = document.getElementById('num_count');#}
+{#    var plusBtn = document.getElementById('button_plus');#}
+{#    var minusBtn = document.getElementById('button_minus');#}
+{#    var maxElement = document.getElementById("num_count").getAttribute("max");#}
+{#    plusBtn.onclick = function () {#}
+{#        var qty = parseInt(numCount.value);#}
+{#        if (qty < maxElement) {#}
+{#            qty = qty + 1;#}
+{#        }#}
+{#        numCount.value = qty;#}
+{#    }#}
+{#    minusBtn.onclick = function () {#}
+{#        var qty = parseInt(numCount.value);#}
+{#        if (qty > 1) {#}
+{#            qty = qty - 1;#}
+{#        }#}
+{#        numCount.value = qty;#}
+{#    }#}
+{#</script>#}
 </html>

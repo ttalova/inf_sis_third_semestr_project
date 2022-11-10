@@ -4,15 +4,9 @@
     {% if message %}
     <p>{{ message }}</p>
     {% else %}
-    {% for product in products %}
-        <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=product.id) }}'">
-        <p>{{ product.id | upper() }}</p>
-        <p>{{ product.description }}</p>
-        <p>{{ product.price }}</p>
-        </div>
-    {% endfor %}
+    {% include "product_short_view.html" %}
         <h1>Итого: {{ total_price.sum }}</h1>
-        <a href="{{ url_for('checkout') }}" class="navbar-item">Оформить заказ</a>
+        <a value='{{ quantity }}' href="{{ url_for('checkout', products=products) }}" class="navbar-item">Оформить заказ</a>
     {% endif %}
 
 

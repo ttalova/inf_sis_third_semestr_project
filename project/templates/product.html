@@ -2,11 +2,24 @@
 
 {% block content %}
     {# переменные из контекста используем с двойными фигурными скобками #}
+    <h2>{{ product.short_description }}</h2>
     <h1>{{ title }}</h1>
     <div>
+    <p>{{ product.weight }} мл.</p>
+    <h3>Описание</h3>
         <p>{{ product.description }}</p>
-        <p>{{ product.price }}</p>
+        <p>Цена: {{ product.price }}</p>
+        <br>
+        <br>
+        <h3>Состав</h3>
+        <p>{{ product.composition }}</p>
+        <p>Количество в наличии: {{ product.quantity }}</p>
+
+    <p>------------</p>
+    <p>Категория______{{ category.name }}</p>
+    <p>Страна______{{ country.name }}</p>
+    <p>Бренд______{{ brand.name }}</p>
     </div>
 
-    <a href="{{ url_for('index') }}" class="navbar-item">Назад</a>
+    <a href="javascript:history.back()", class="navbar-item">Назад</a>
 {% endblock %}

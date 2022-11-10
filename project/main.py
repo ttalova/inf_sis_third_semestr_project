@@ -1,6 +1,9 @@
 from flask import Flask, redirect, url_for, render_template, request, make_response, session
 import datetime
 from db_util import Database
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from help_function import *
 
 app = Flask(__name__)
 app.secret_key = '111'
@@ -11,49 +14,43 @@ app.permanent_session_lifetime = datetime.timedelta(days=365)
 db = Database()
 
 
-@app.route('/products')
+@app.route('/products', methods=['GET', 'POST'])
 def index():
+    session.setdefault('admin', False)
+    session['no_user'] = {'favorites': [], 'shopping_cart': {}}
     products = db.select(f"SELECT * FROM product")
-    id = request.args.get("id")
-    name = request.args.get("name")
-    description = request.args.get("description")
-    price = request.args.get("price")
-    category = request.args.get("category")
-    image = request.args.get("image")
-    brand = request.args.get("brand")
-    country = request.args.get("country")
-    if 'shopping_cart' not in session:
-        exist = []
+    search = ''
+    categories = db.select(f"SELECT * FROM category")
+    if isinstance(products, dict):
+        products = [products]
+    if isinstance(categories, dict):
+        categories = [categories]
+    if request.method == 'POST':
+        search = request.form.get('search', '')
+        category = request.form.get('category')
+        if search:
+            products = [product for product in products if search.lower() in product['name'].lower() or search.lower() in product['description'].lower()]
+        if category:
+            products = [product for product in products if
+                        int(category) == product['category']]
+    if 'email' not in session:
+        session['email'] = 'no_user'
+        session[session['email']] = {'favorites': [], 'shopping_cart': {}}
+        session_modified()
+    user = user_logining()
+    if products:
+        quantity = [1] * len(products)
+        products = zip(products, quantity)
     else:
-        exist = session['shopping_cart']
-
-    if 'favorites' not in session:
-        exist_favorites = []
-    else:
-        exist_favorites = session['favorites']
-
-    if 'email' in session:
-        user = session['email']
-    else:
-        user = None
-
-    # if rating:
-    #     films = [x for x in films if float(x['rating']) >= float(rating)]
-    # # формируем контекст, который мы будем передавать для генерации шаблона
+        products = None
     context = {
         'products': products,
         'title': "Products",
-        'id': id,
-        'name': name,
-        'description': description,
-        'price': price,
-        'category': category,
-        'image': image,
-        'brand': brand,
-        'country': country,
-        'exist': exist,
+        'exist': exist(),
         'user': user,
-        'exist_favorites': exist_favorites
+        'search': search,
+        'categories': categories,
+        'site': 'index'
     }
     # возвращаем сгенерированный шаблон с нужным нам контекстом
     return render_template("index.html", **context)
@@ -65,7 +62,14 @@ def get_product(product_id):
     product = db.select(f"SELECT * FROM product WHERE id = {product_id}")
 
     if len(product):
-        return render_template("product.html", title=product['name'], product=product)
+        content = {
+            'title': product['name'],
+            'product': product,
+            'category': db.select(f"SELECT name FROM category WHERE id='{product['category']}'"),
+            'country': db.select(f"SELECT name FROM country WHERE id='{product['country']}'"),
+            'brand': db.select(f"SELECT name FROM brand WHERE id='{product['brand']}'")
+        }
+        return render_template("product.html", **content)
 
     # если нужный фильм не найден, возвращаем шаблон с ошибкой
     return render_template("error.html", error="Такого товара не существует")
@@ -77,12 +81,18 @@ def signup():
     if request.method == 'POST':
         user = db.select(f"SELECT * FROM mail_user WHERE mail_user.email = '{request.form.get('email')}'")
         if not user:
+            password = generate_password_hash(request.form.get('password'))
             db.insert(
-                f"INSERT INTO mail_user (name, email, password) VALUES ('{request.form.get('name')}', '{request.form.get('email')}', '{request.form.get('password')}')")
-            message = 'Вы успешно зарегистрированы'
+                f"INSERT INTO mail_user (name, gender, email, password, role) VALUES ('{request.form.get('name')}', '{request.form.get('gender')}', '{request.form.get('email')}', '{password}', 'user')")
+            session['email'] = request.form.get('email')
+            session[session['email']] = {'favorites': [], 'shopping_cart': {}}
+            session.pop('no_user', None)
+            session['admin'] = False
+            return redirect(url_for("index"))
         else:
             message = 'Исправьте ошибки'
-    return render_template("signup.html", message=message)
+    user = user_logining()
+    return render_template("signup.html", message=message, user=user)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -90,86 +100,70 @@ def login():
     message = None
     if request.method == "POST":
         user = db.select(f"SELECT * FROM mail_user WHERE mail_user.email = '{request.form.get('email')}'")
-        if user and user['password'] == request.form.get('password'):
+        if user and check_password_hash(user['password'], request.form.get('password')):
             session['email'] = request.form.get('email')  # чтение и обновление данных сессии
-            return redirect(url_for("index", user=user))
-        if not session.modified:
-            session.modified = True
+            if user['role'] == 'admin':
+                session['admin'] = True
+            if session['email'] not in session:
+                session[session['email']] = {'favorites': [], 'shopping_cart': {}}
+            if len(session['no_user']) != 0:
+                session[session['email']]['favorites'] += session['no_user']['favorites']
+                session[session['email']]['shopping_cart'].update(session['no_user']['shopping_cart'])
+                session.pop('no_user', None)
+            session_modified()
+            return redirect(url_for("index"))
         else:
             message = 'Неправильный логин или пароль'
-    return render_template("login.html", message=message)
-
-
-@app.route('/profile')
-def profile():
     user = user_logining()
-    return render_template('profile.html', user=user)
+    return render_template("login.html", message=message, user=user)
 
 
 @app.route('/logout')
 def logout():
-    session.pop('email', None)
+    session['email'] = 'no_user'
+    session['admin'] = False
+    if 'no_user' not in session:
+        session['no_user'] = {'favorites': [], 'shopping_cart': {}}
+        session_modified()
     return redirect(url_for("index"))
 
 
 @app.route('/add_to_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def add_to_shopping_cart(product_id):
-    exist = False
-    if 'shopping_cart' in session:
-        if product_id in session['shopping_cart']:
-            exist = True
-        else:
-            session['shopping_cart'].append(product_id)
-    else:
-        session['shopping_cart'] = [product_id]
-    if not session.modified:
-        session.modified = True
-
-    user = user_logining()
-    return redirect(url_for("index", exist=exist, user=user))
-
-
+    return add(str(product_id), 'shopping_cart')
 @app.route('/delete_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def delete_from_shopping_cart(product_id):
-    exist = True
-    if 'shopping_cart' in session:
-        if product_id in session['shopping_cart']:
-            exist = False
-            session['shopping_cart'].remove(product_id)
-    if len(session['shopping_cart']) == 0:
-        session.pop('shopping_cart', None)
-    if not session.modified:
-        session.modified = True
-    user = user_logining()
-    return redirect(url_for("index", exist=exist, user=user))
-
+    return delete(str(product_id), 'shopping_cart')
 
 @app.route('/shopping_cart', methods=['GET', 'POST'])
 def shopping_cart():
     message = False
-    if 'shopping_cart' in session:
-        prods = '(' + str(session['shopping_cart'])[1:-1] + ')'
-        products = db.select(f"SELECT * FROM product WHERE id IN {prods}")
-        total_price = db.select(f"SELECT sum(price) FROM product WHERE id IN {prods}")
-
-        session['total_price'] = total_price['sum']
-        if not session.modified:
-            session.modified = True
-
-        print(total_price)
-        if type(products) == dict:
+    if session[session['email']]['shopping_cart']:
+        products = db.select(f"SELECT * FROM product WHERE id IN {prods_shopping_cart()}")
+        total_price = db.select(f"SELECT sum(price) FROM product WHERE id IN {prods_shopping_cart()}")
+        session[session['email']]['total_price'] = total_price['sum']
+        if isinstance(products, dict):
             products = [products]
     else:
-        total_price = None
+        session[session['email']]['total_price'] = []
+        total_price = session[session['email']]['total_price']
         products = None
         message = 'Корзина пуста'
+    session_modified()
     user = user_logining()
+    if products:
+        quantity = [1] * len(products)
+        products = zip(products, quantity)
+    else:
+        products = None
     context = {
         'title': 'Корзина',
         'products': products,
         'message': message,
         'user': user,
-        'total_price': total_price
+        'total_price': total_price,
+        'exist': exist(),
+        'site': 'shopping_cart'
     }
 
     return render_template("shopping_cart.html", **context)
@@ -177,53 +171,37 @@ def shopping_cart():
 
 @app.route('/add_to_favorites/<int:product_id>', methods=['GET', 'POST'])
 def add_to_favorites(product_id):
-    exist = False
-    if 'favorites' in session:
-        if product_id in session['favorites']:
-            exist = True
-        else:
-            session['favorites'].append(product_id)
-    else:
-        session['favorites'] = [product_id]
-    if not session.modified:
-        session.modified = True
-
-    user = user_logining()
-    return redirect(url_for("index", exist=exist, user=user))
+    return add(product_id, 'favorites')
 
 
 @app.route('/delete_favorites/<int:product_id>', methods=['GET', 'POST'])
 def delete_from_favorites(product_id):
-    exist = True
-    if 'favorites' in session:
-        if product_id in session['favorites']:
-            exist = False
-            session['favorites'].remove(product_id)
-    if len(session['favorites']) == 0:
-        session.pop('favorites', None)
-    if not session.modified:
-        session.modified = True
-    user = user_logining()
-    return redirect(url_for("index", exist=exist, user=user))
+    return delete(product_id, 'favorites')
 
 
 @app.route('/favorites', methods=['GET', 'POST'])
 def favorites():
     message = False
-    if 'favorites' in session:
-        prods = '(' + str(session['favorites'])[1:-1] + ')'
-        products = db.select(f"SELECT * FROM product WHERE id IN {prods}")
-        if type(products) == dict:
+    if session[session['email']]['favorites']:
+        products = db.select(f"SELECT * FROM product WHERE id IN {prods_favorites()}")
+        if isinstance(products, dict):
             products = [products]
     else:
         products = None
         message = 'В избранном ничего нет'
     user = user_logining()
+    if products:
+        quantity = [1] * len(products)
+        products = zip(products, quantity)
+    else:
+        products = None
     context = {
         'title': 'Избранное',
         'products': products,
         'message': message,
-        'user': user
+        'user': user,
+        'site': 'favorites',
+        'exist': exist()
     }
 
     return render_template("favorites.html", **context)
@@ -232,35 +210,49 @@ def favorites():
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     message = None
+    if prods_shopping_cart() != '()':
+        products = db.select(f"SELECT * FROM product WHERE id IN {prods_shopping_cart()}")
+    else:
+        products = None
+    print(session)
+    if isinstance(products, dict):
+        products = [products]
     if request.method == 'POST':
-        order = request.form
-        user_email = session['email']
+        order = request.form.get('order_products')
+        user_email = db.select(f"SELECT id FROM mail_user WHERE email='{session['email']}'")['id']
         order_data = datetime.datetime.now()
-        total_price = session['total_price']
-        products = session['shopping_cart']
+        total_price = session[session['email']]['total_price']
         if order:
-            print(11111)
+            products = list(map(int, session[session['email']]['shopping_cart'].keys()))
             db.insert(
-                f"INSERT INTO user_order (mail_user, order_data, order_time, total_price, product) VALUES ('{user_email}', '{order_data}', '{order_data}', '{total_price}', '{products}')")
-            session.pop('total_price', None)
-            session.pop('shopping_cart', None)
+                f"INSERT INTO user_order (mail_user, order_data, order_time, total_price, product, quantity) VALUES ('{user_email}', '{order_data}', '{order_data}', '{total_price}', '{products}', 111)")
+            products = db.select(f"SELECT * FROM product WHERE id IN {prods_shopping_cart()}")
+            if isinstance(products, dict):
+                products = [products]
+            session[session['email']].pop('total_price', None)
+            session[session['email']]['shopping_cart'] = {}
+            session_modified()
             message = 'Заказ успешно оформлен'
         else:
-            print(2222)
             message = 'Произошла ошибка'
-        print(order_data)
-    return render_template("checkout.html", message=message)
+    orders_exist=1
+    if products:
+        quantity = [1] * len(products)
+        products = zip(products, quantity)
+    else:
+        products = None
+    return render_template("checkout.html", message=message, products=products, exist=exist(), orders_exist=orders_exist)
 
 
 @app.route('/orders')
 def orders():
-    user_in = str(session['email'])
+    user_in = db.select(f"SELECT id FROM mail_user WHERE email='{session['email']}'")['id']
     products_list = db.select(f"SELECT order_data, order_time, product FROM user_order WHERE mail_user='{user_in}'")
     message = None
     if products_list:
         products = []
         order_datas = []
-        if type(products_list) == dict:
+        if isinstance(products_list, dict):
             products_list = [products_list]
         for product_order in products_list:
             order_data = product_order['order_data']
@@ -281,14 +273,48 @@ def orders():
     return render_template('orders.html', message=message, products=zip(products, order_datas), user=user)
 
 
+@app.route('/profile')
+def profile():
+    user = user_logining()
+    user_mail = db.select(f"SELECT * FROM mail_user WHERE email = '{session['email']}'")
+    return render_template('profile.html', user_mail=user_mail, user=user)
 
 
-def user_logining():
-    if 'email' in session:
-        user = session['email']
+@app.route('/edit_profile', methods=['GET', 'POST'])
+def edit_profile():
+    message = None
+    user_data = db.select(f"SELECT * FROM mail_user WHERE email='{session['email']}'")
+    if user_data['gender'] == 'Женский':
+        gender = 1
     else:
-        user = None
-    return user
+        gender = 0
+    if request.method == 'POST':
+        email_edit = request.form.get('email')
+        gender_edit = request.form.get('gender')
+        name_edit = request.form.get('name')
+        if email_edit != session['email'] and db.select(f"SELECT * FROM mail_user WHERE email = '{email_edit}'"):
+                message = 'Данные нельзя поменять'
+        elif user_data['email'] == email_edit and user_data['name'] == name_edit and request.form.get('password') == '' and user_data['gender'] == gender_edit:
+            message = 'Данные не были изменены'
+        else:
+            password_edit = generate_password_hash(request.form.get('password'))
+            if request.form.get('password') != '':
+                db.update(
+                    f"UPDATE mail_user SET name='{request.form.get('name')}', gender = '{gender_edit}', email='{email_edit}', password='{password_edit}' WHERE mail_user.email = '{session['email']}'")
+            else:
+                db.update(
+                    f"UPDATE mail_user SET name='{request.form.get('name')}', gender = '{gender_edit}', email='{email_edit}' WHERE mail_user.email = '{session['email']}'")
+            if email_edit != session['email']:
+                email_before_edit = session['email']
+                session['email'] = email_edit
+                session[session['email']] = session[email_before_edit]
+                session.pop(email_before_edit, None)
+                session_modified()
+            message = 'Данные изменены'
+            return redirect(url_for('profile', message=message))
+    user = bool(user_logining())
+    user_data = db.select(f"SELECT * FROM mail_user WHERE email='{session['email']}'")
+    return render_template("edit_profile.html", user_data=user_data, user=user, message=message, gender=gender)
 
 
 

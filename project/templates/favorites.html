@@ -4,13 +4,7 @@
     {% if message %}
     <p>{{ message }}</p>
     {% else %}
-    {% for product in products %}
-        <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=product.id) }}'">
-        <p>{{ product.id | upper() }}</p>
-        <p>{{ product.description }}</p>
-        <p>{{ product.price }}</p>
-        </div>
-    {% endfor %}
+    {% include "product_short_view.html" %}
     {% endif %}
 {% endblock %}
 

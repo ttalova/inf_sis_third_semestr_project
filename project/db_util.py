@@ -43,3 +43,7 @@ class Database:
                 films += [{c_name: row[key] for key, c_name in enumerate(column_names)}]
 
             return films
+
+    def update(self, query):
+        self.cur.execute(query)
+        self.con.commit()
