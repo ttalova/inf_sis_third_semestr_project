@@ -45,7 +45,7 @@
                                 Выход
                             </a>
                         {% endif %}
-                    {% if request.session['admin'] %}
+                    {% if admin %}
                         <a href="{{ url_for('add_product') }}" class="navbar-item">
                                 Добавить товар
                             </a>

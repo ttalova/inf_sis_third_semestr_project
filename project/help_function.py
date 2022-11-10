@@ -39,6 +39,10 @@ def session_modified():
     if not session.modified:
         session.modified = True
 
+def is_in_db(get_data, parametr, db):
+    if get_data == '0':
+        return db[parametr]
+    return get_data
 # def quantity_of_goods():
 #     if request.form.get('quantity_order'):
 #         print(request.form.get('quantity_order'))

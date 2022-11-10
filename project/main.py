@@ -29,7 +29,8 @@ def index():
         search = request.form.get('search', '')
         category = request.form.get('category')
         if search:
-            products = [product for product in products if search.lower() in product['name'].lower() or search.lower() in product['description'].lower()]
+            products = [product for product in products if
+                        search.lower() in product['name'].lower() or search.lower() in product['description'].lower()]
         if category:
             products = [product for product in products if
                         int(category) == product['category']]
@@ -50,7 +51,8 @@ def index():
         'user': user,
         'search': search,
         'categories': categories,
-        'site': 'index'
+        'site': 'index',
+        'admin': session['admin']
     }
     # возвращаем сгенерированный шаблон с нужным нам контекстом
     return render_template("index.html", **context)
@@ -60,14 +62,15 @@ def index():
 def get_product(product_id):
     # используем метод-обертку для выполнения запросов к БД
     product = db.select(f"SELECT * FROM product WHERE id = {product_id}")
-
     if len(product):
         content = {
             'title': product['name'],
             'product': product,
             'category': db.select(f"SELECT name FROM category WHERE id='{product['category']}'"),
             'country': db.select(f"SELECT name FROM country WHERE id='{product['country']}'"),
-            'brand': db.select(f"SELECT name FROM brand WHERE id='{product['brand']}'")
+            'brand': db.select(f"SELECT name FROM brand WHERE id='{product['brand']}'"),
+            'admin': session['admin'],
+
         }
         return render_template("product.html", **content)
 
@@ -131,9 +134,12 @@ def logout():
 @app.route('/add_to_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def add_to_shopping_cart(product_id):
     return add(str(product_id), 'shopping_cart')
+
+
 @app.route('/delete_sh_cart/<int:product_id>', methods=['GET', 'POST'])
 def delete_from_shopping_cart(product_id):
     return delete(str(product_id), 'shopping_cart')
+
 
 @app.route('/shopping_cart', methods=['GET', 'POST'])
 def shopping_cart():
@@ -235,13 +241,14 @@ def checkout():
             message = 'Заказ успешно оформлен'
         else:
             message = 'Произошла ошибка'
-    orders_exist=1
+    orders_exist = 1
     if products:
         quantity = [1] * len(products)
         products = zip(products, quantity)
     else:
         products = None
-    return render_template("checkout.html", message=message, products=products, exist=exist(), orders_exist=orders_exist)
+    return render_template("checkout.html", message=message, products=products, exist=exist(),
+                           orders_exist=orders_exist)
 
 
 @app.route('/orders')
@@ -293,8 +300,9 @@ def edit_profile():
         gender_edit = request.form.get('gender')
         name_edit = request.form.get('name')
         if email_edit != session['email'] and db.select(f"SELECT * FROM mail_user WHERE email = '{email_edit}'"):
-                message = 'Данные нельзя поменять'
-        elif user_data['email'] == email_edit and user_data['name'] == name_edit and request.form.get('password') == '' and user_data['gender'] == gender_edit:
+            message = 'Данные нельзя поменять'
+        elif user_data['email'] == email_edit and user_data['name'] == name_edit and request.form.get(
+                'password') == '' and user_data['gender'] == gender_edit:
             message = 'Данные не были изменены'
         else:
             password_edit = generate_password_hash(request.form.get('password'))
@@ -317,6 +325,38 @@ def edit_profile():
     return render_template("edit_profile.html", user_data=user_data, user=user, message=message, gender=gender)
 
 
+@app.route('/add_product', methods=['GET', 'POST'])
+def add_product():
+    message = None
+    if request.method == 'POST':
+        db.insert(
+            f"INSERT INTO product (name, short_description, description, price, category, image, brand, country, weight, composition, quantity) "
+            f"VALUES ('{request.form.get('name')}', '{request.form.get('short_description')}', '{request.form.get('description')}', {float(request.form.get('price'))}, {int(request.form.get('category'))}, '{request.form.get('image')}', {int(request.form.get('brand'))}, {int(request.form.get('country'))}, {float(request.form.get('weight'))}, '{request.form.get('composition')}', {int(request.form.get('quantity'))})")
+        message = 'Товар добавлен'
+    user = user_logining()
+    return render_template("add_product.html", message=message, user=user)
 
+
+@app.route('/edit_product, <int:product_id>', methods=['GET', 'POST'])
+def edit_product(product_id):
+    message = None
+    product = db.select(f"SELECT * FROM product WHERE id={product_id}")
+    brand = is_in_db(request.form.get('brand'), 'brand', product)
+    country = is_in_db(request.form.get('country'), 'country', product)
+    category = is_in_db(request.form.get('category'), 'category', product)
+    if request.method == 'POST':
+        db.update(
+            f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', description='{request.form.get('description')}', price={float(request.form.get('price'))}, category={int(category)}, image='{request.form.get('image')}', brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight'))}, composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))}")
+        message = 'Данные изменены'
+        return redirect(url_for('get_product', message=message, product_id=product_id))
+    user = user_logining()
+    product_data = db.select(f"SELECT * FROM product WHERE id={product_id}")
+    print(product_data)
+    return render_template("edit_product.html", message=message, user=user, product=product, admin=session['admin'], product_data=product_data)
+
+
+@app.route('/delete_product, <int:product_id>', methods=['GET', 'POST'])
+def delete_product(product_id):
+    pass
 if __name__ == '__main__':
     app.run(port=9000, debug=True, host='localhost')

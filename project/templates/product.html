@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if message %}
+        <small>{{ message }}</small>
+    {% endif %}
     {# переменные из контекста используем с двойными фигурными скобками #}
     <h2>{{ product.short_description }}</h2>
     <h1>{{ title }}</h1>
@@ -20,6 +23,9 @@
     <p>Страна______{{ country.name }}</p>
     <p>Бренд______{{ brand.name }}</p>
     </div>
-
+    {% if admin %}
+                <a href="{{ url_for('edit_product', product_id=product.id) }}"
+                           class="navbar-item">Редактировать</a>
+            {% endif %}
     <a href="javascript:history.back()", class="navbar-item">Назад</a>
 {% endblock %}

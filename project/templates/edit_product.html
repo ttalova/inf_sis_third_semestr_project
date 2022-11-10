@@ -4,33 +4,34 @@
     <div class="column is-4 is-offset-4">
         <h3 class="title">Add product</h3>
         <div class="box">
-            <form method="POST" action="/add_product">
+            <form method="POST" >
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="name"  placeholder="Name" autofocus="" required>
+                        <input class="input is-large" type="text" name="name" value="{{ product_data.name }}" placeholder="Name" autofocus="" required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="short_description" placeholder="short description" required>
+                        <input class="input is-large" type="text" name="short_description" value="{{ product_data.short_description }}" placeholder="short description" required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="description"  placeholder="description"
+                        <input class="input is-large" type="text" name="description" value="{{ product_data.description }}" placeholder="description"
                                autofocus="" required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="price"  placeholder="price" autofocus=""
+                        <input class="input is-large" type="text" name="price" value="{{ product_data.price }}" placeholder="price" autofocus=""
                                required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <select class="input is-large"  name="category" required>
+                        <select class="input is-large" name="category" required>
                             <option disabled>Категория</option>
+                            <option value="0">Без изменений</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                         </select>
@@ -44,8 +45,9 @@
                 </div>
                 <div class="field">
                     <div class="control">
-                        <select class="input is-large"  name="brand" required>
+                        <select class="input is-large" name="brand" required>
                             <option disabled>Бренд</option>
+                            <option value="0">Без изменений</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                         </select>
@@ -55,6 +57,7 @@
                     <div class="control">
                         <select class="input is-large" name="country" required>
                             <option disabled>Страна</option>
+                            <option value="0">Без изменений</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                         </select>
@@ -62,17 +65,17 @@
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="weight" placeholder="weight" required>
+                        <input class="input is-large" type="text" value="{{ product_data.weight }}" name="weight" placeholder="weight" required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text"  name="composition" placeholder="composition" required>
+                        <input class="input is-large" type="text" value="{{ product_data.composition }}" name="composition" placeholder="composition" required>
                     </div>
                 </div>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="number" name="quantity"  placeholder="quantity" required>
+                        <input class="input is-large" type="number" name="quantity" value="{{ product_data.quantity }}"  placeholder="quantity" required>
                     </div>
                 </div>
                 <button class="button is-block is-info is-large is-fullwidth">Сохранить</button>
