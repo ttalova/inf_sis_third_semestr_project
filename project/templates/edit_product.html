@@ -1,89 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="column is-4 is-offset-4">
-        <h3 class="title">Add product</h3>
-        <div class="box">
-            <form method="POST" >
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" name="name" value="{{ product_data.name }}" placeholder="Name" autofocus="" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" name="short_description" value="{{ product_data.short_description }}" placeholder="short description" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" name="description" value="{{ product_data.description }}" placeholder="description"
-                               autofocus="" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" name="price" value="{{ product_data.price }}" placeholder="price" autofocus=""
-                               required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <select class="input is-large" name="category" required>
-                            <option disabled>Категория</option>
-                            <option value="0">Без изменений</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" value="image" type="text" name="image" placeholder="image"
-                               autofocus="" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <select class="input is-large" name="brand" required>
-                            <option disabled>Бренд</option>
-                            <option value="0">Без изменений</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <select class="input is-large" name="country" required>
-                            <option disabled>Страна</option>
-                            <option value="0">Без изменений</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" value="{{ product_data.weight }}" name="weight" placeholder="weight" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="text" value="{{ product_data.composition }}" name="composition" placeholder="composition" required>
-                    </div>
-                </div>
-                <div class="field">
-                    <div class="control">
-                        <input class="input is-large" type="number" name="quantity" value="{{ product_data.quantity }}"  placeholder="quantity" required>
-                    </div>
-                </div>
-                <button class="button is-block is-info is-large is-fullwidth">Сохранить</button>
-                <br>
-                {% if message %}
-                    <small>{{ message }}</small>
-                {% endif %}
-            </form>
+    <form enctype="multipart/form-data" method="POST">
+        <div class="preprofile" style="margin: 0px 10px;">
+            <a class="bottom_total" href="javascript:history.back()">
+                Назад
+            </a>
+            <br>
         </div>
-    </div>
+        <div class="container" style="color: rgba(0, 0, 0, 0.55);">
+            <h1>Редактировать товар</h1><br>
+        {% if message %}
+            <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
+            <br>
+        {% endif %}
+            <hr>
+            <br>
+            <label for="name"><b>Название товара</b></label>
+            <input class="inpt" type="text" placeholder="Название товара" name="name" value="{{ product.name }}" required>
+
+            <label for="short_description"><b>Краткое описание</b></label>
+            <input class="inpt" type="text" placeholder="Краткое описание" name="short_description" value="{{ product.short_description }}" required>
+
+            <label for="description"><b>Описание</b></label>
+            <input class="inpt" type="text" placeholder="Краткое описание" name="description" value="{{ product.description }}" required>
+
+            <label for="price"><b>Цена</b></label>
+            <input class="inpt" type="text" placeholder="Цена" name="price" value="{{ product.price }}" required>
+
+            <label for="category"><b>Категория</b></label>
+            <select class="inpt" name="category" required>
+                <option disabled>Категория</option>
+            <option value="0">Без изменений</option>
+                {% for ct in category %}
+                    <option value="{{ ct.id }}">{{ ct.name }}</option>
+                {% endfor %}
+            </select><br>
+            <label for="photo"><b>Загрузите изображение</b></label>
+            <input class="inpt" type="file" name="photo" accept="static/*,image/jpeg">
+
+            <label for="brand"><b>Бренд</b></label>
+            <select class="inpt" name="brand" required>
+                <option disabled>Бренд</option>
+            <option value="0">Без изменений</option>
+                {% for br in brand %}
+                    <option value="{{ br.id }}">{{ br.name }}</option>
+                {% endfor %}
+            </select><br>
+
+
+            <label for="country"><b>Страна</b></label>
+            <select class="inpt" name="country" required>
+                <option disabled>Страна</option>
+            <option value="0">Без изменений</option>
+                {% for cr in country %}
+                    <option value="{{ cr.id }}">{{ cr.name }}</option>
+                {% endfor %}
+            </select><br>
+
+
+        <label for="weight"><b>Вес (мл.)</b></label>
+                <input class="inpt" type="text" name="weight" placeholder="Вес" value="{{ product.weight }}" required>
+
+       <label for="composition"><b>Состав</b></label>
+                <input class="inpt" type="text" name="composition" placeholder="Состав" value="{{ product.composition }}" required>
+
+        <label for="quantity"><b>Количество товара</b></label>
+                <input class="inpt" type="number" name="quantity" placeholder="Количество" value="{{ product.quantity }}"required>
+
+        <button type="submit" class="bottom_total">Сохранить</button>
+        </div>
+    </form>
 {% endblock %}

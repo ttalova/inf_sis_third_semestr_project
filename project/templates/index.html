@@ -2,14 +2,22 @@
 
 {% block content %}
     <form method="post">
-        <select class="input is-large" name="category">
+        <select class="box" name="category">
             <option disabled>Категория</option>
-            <option value="None">Не выбрано</option>
+        {% if not category_selected %}
+            <option value="0" selected="selected">Не выбрано</option>
+        {% else %}
+        <option value="0">Не выбрано</option>
+        {% endif %}
             {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% if category_selected == category.id %}
+                <option value="{{ category.id }}" selected="selected">{{ category.name }}</option>
+                {% else %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endif %}
             {% endfor %}
         </select>
-        <button class="button is-block is-info is-large is-fullwidth">Выбрать</button>
+        <button class="select_button">Выбрать</button>
     </form>
     {% include "product_short_view.html" %}
 {% endblock %}

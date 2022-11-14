@@ -47,3 +47,7 @@ class Database:
     def update(self, query):
         self.cur.execute(query)
         self.con.commit()
+
+    def delete(self, query):
+        self.cur.execute(query)
+        self.con.commit()

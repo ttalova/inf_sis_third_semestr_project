@@ -1,16 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="title">
-        Welcome, {{ user_mail.name }}!
-        <div>
-            <h3>Имя: {{ user_mail.name }}</h3>
-            <h3>Email: {{ user_mail.email }}</h3>
-            <h3>Пол: {{ user_mail.gender }}</h3><br>
-
-            <a href="{{ url_for('edit_profile') }}" class="navbar-item">
-                Изменить
+    <div class="preprofile">
+        <a class="bottom_total" href="{{ url_for('orders') }}">
+            Мои заказы
+        </a>
+        <br>
+        <a class="bottom_total" href="{{ url_for('shopping_cart') }}">
+            Корзина
+        </a>
+        <br>
+        {% if admin %}
+            <a class="bottom_total" href="{{ url_for('add_product') }}">
+                Добавить товар
             </a>
+        {% endif %}
+    </div>
+    <h1 class="title" style="font-size: 20px">
+        <div class="container" style="color: rgba(0, 0, 0, 0.55);">
+            <h1>Профиль</h1><br>
+            <hr>
+            <br>
+            <h3 class="inpt">Имя: {{ user_mail.name }}</h3>
+            <br>
+            <h3 class="inpt">Email: {{ user_mail.email }}</h3>
+            <br>
+            <h3 class="inpt">Пол: {{ user_mail.gender }}</h3><br>
+            <br>
+            <div class="btn-group" style="display:inline-block; width: 100%">
+                <a class="bottom_total" href="{{ url_for('edit_profile') }}">
+                    Изменить
+                </a>
+            </div>
             {% if message %}
                 <small>{{ message }}</small>
             {% endif %}

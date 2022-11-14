@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% include "product_short_view.html" %}
-    <form method="post" >
-        <h2>Адрес и доставка</h2>
-        <label for="city"><i class="fa fa-institution"></i> Город</label>
-        <input type="text" id="city" name="city" placeholder="New York" required>
-        <label for="adr"><i class="fa fa-address-card-o"></i> Адрес</label>
-        <input type="text" id="adr" name="address" placeholder="542 W. 15th Street" required>
-        <h2>Получатель</h2>
-        <label for="fname"><i class="fa fa-user"></i> Фамилия</label>
-        <input type="text" id="fname" name="firstname" placeholder="Иванов" required>
-        <label for="fname"><i class="fa fa-user"></i> Имя</label>
-        <input type="text" id="fname" name="firstname" placeholder="Иван" required>
-        <label for="fname"><i class="fa fa-user"></i> Отчество</label>
-        <input type="text" id="fname" name="firstname" placeholder="Иванович" required>
-        <label for="email"><i class="fa fa-envelope"></i> Email</label>
-        <input type="email" id="email" name="email" placeholder="john@example.com" required>
-    <br>
-     <label>
-            <input type="checkbox" checked="checked" name="sameadr" required> Оплата курьером с оплатой при получении</label>
+    <form method="post" xmlns="http://www.w3.org/1999/html">
+    <div class="preprofile" style="margin: 0px 10px;">
+        <a class="bottom_total" href="javascript:history.back()">
+            Назад
+        </a>
         <br>
-    <input type="submit" name='order_products' value="Заказать" class="btn">
-    <br>
+    </div>
+    <div class="container">
+        <h2>Адрес и доставка</h2>
+        <br>
     {% if message %}
-    <p>{{ message }}</p>
+    <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
     {% endif %}
+        <hr>
+        <br>
+        <label for="city">Город</label>
+        <input type="text" class="inpt" name="city" placeholder="New York" required>
+        <label for="adr">Адрес</label>
+        <input type="text" class="inpt" name="address" placeholder="542 W. 15th Street" required>
+        <h2>Получатель</h2><hr>
+        <br>
+        <label for="fname">Фамилия</label>
+        <input type="text" class="inpt" name="second_name" placeholder="Иванов" required>
+        <label for="fname">Имя</label>
+        <input type="text" class="inpt" name="first_name" placeholder="Иван" required>
+        <label for="fname">Отчество</label>
+        <input type="text" class="inpt" name="third_name" placeholder="Иванович" required>
+        <label for="email">Email</label>
+        <input type="email" class="inpt" name="email" placeholder="john@example.com" required>
+        <input style="" type="checkbox"  checked="checked" name="sameadr" required>Оплата курьером с оплатой при получении</input>
+        <br><br>
+    <button type="submit" name='order_products'  value="1" class="bottom_total" style="width: 70%; padding: 10px;">Заказать</button>
+    </div>
     </form>
 {% endblock %}
 

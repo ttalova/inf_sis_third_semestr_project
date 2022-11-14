@@ -3,91 +3,68 @@
 
 <head>
     <meta charset="utf-8">
-    {#    <meta http-equiv="X-UA-Compatible" content="IE=edge">#}
-    {#    <meta name="viewport" content="width=device-width, initial-scale=1">#}
-    <title>Flask Auth Example</title>
-    {#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css" />#}
+    <title>Platinum Pear</title>
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </head>
 
 <body>
 <section class="hero is-primary is-fullheight">
-
-    <div class="hero-head">
-        <nav class="navbar">
-            <div class="container">
-
-                <div id="navbarMenuHeroA" class="navbar-menu">
-                    <div class="navbar-end">
-                        <a href="{{ url_for('index') }}" class="navbar-item">
-                            platinum pear
-                        </a>
-                        <a href="{{ url_for('shopping_cart') }}" class="navbar-item">
-                            Корзина
-                        </a>
-                        <a href="{{ url_for('favorites') }}" class="navbar-item">
-                            Избранное
-                        </a>
-                        {% if user %}
-                            <a href="{{ url_for('signup') }}" class="navbar-item">
-                                Регистрация
-                            </a>
-                            <a href="{{ url_for('login') }}" class="navbar-item">
-                                Вход
-                            </a>
-                        {% else %}
-                            <a href="{{ url_for('profile') }}" class="navbar-item">
-                                Profile
-                            </a>
-                            <a href="{{ url_for('orders') }}" class="navbar-item">
-                                Заказы
-                            </a>
-                            <a href="{{ url_for('logout') }}" class="navbar-item">
-                                Выход
-                            </a>
-                        {% endif %}
-                    {% if admin %}
-                        <a href="{{ url_for('add_product') }}" class="navbar-item">
-                                Добавить товар
-                            </a>
-                    {% endif %}
-                        <form class="form-inline my-2 my-lg-0" action="" method="post">
-                            <input value="{{ search | default(default_value = '', boolean = False) }}"
-                                   class="form-control mr-sm-2" name="search" type="text"
-                                   placeholder="Поиск..." aria-label="Search">
-                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </nav>
+    <nav class="top-menu" style="background-color: #D3D3D3;">
+        <ul class="menu-main">
+            <li class="left-item"><a href="{{ url_for('index') }}">
+                Platinum Pear
+            </a></li>
+            <li class="left-item"><a href="{{ url_for('shopping_cart') }}">
+                Корзина
+            </a></li>
+            <li class="left-item"><a href="{{ url_for('favorites') }}">
+                Избранное
+            </a></li>
+            {% if user %}
+                <li class="right-item"><a href="{{ url_for('signup') }}">
+                    Регистрация
+                </a></li>
+                <li class="right-item"><a href="{{ url_for('login') }}">
+                    Вход
+                </a></li>
+            {% else %}
+                <li class="right-item"><a href="{{ url_for('logout') }}">
+                    Выход
+                </a></li>
+                <li class="right-item"><a href="{{ url_for('profile') }}">
+                    Профиль
+                </a></li>
+            {% endif %}
+            {% if indexx %}
+                <form class="right-item" action="" method="post">
+                    <input value="{{ search | default(default_value = '', boolean = False) }}"
+                           class="right-item" name="search" type="text"
+                           placeholder="Поиск..." aria-label="Search">
+                    <button class="right-item" type="submit"></button>
+                </form>
+            {% endif %}
+        </ul>
+        <a class="navbar-logo" href="{{ url_for('index') }}"><img src="/static/logo.png"
+                                                                  style="height:100%; width:auto;"></a>
+    </nav>
+    <div class="help">
+        <p>__________________</p>
     </div>
-
-    <div class="hero-body">
-        <div class="container has-text-centered">
-            {% block content %}
-            {% endblock %}
-        </div>
-    </div>
+    {% block content %}
+    {% endblock %}
 </section>
+<footer>
+    <div class="waves">
+        <div class="wave" id="wave1"></div>
+    </div>
+    <ul class="menu-footer">
+        <li><a href="{{ url_for('index') }}">Platinum Pear</a></li>
+        <li><a href="{{ url_for('shopping_cart') }}">Корзина</a></li>
+        <li><a href="{{ url_for('favorites') }}">Избранное</a></li>
+    </ul>
+    <p>©2022 Semester project | Talova Olesya</p>
+</footer>
 </body>
-{#<script>#}
-{#    var numCount = document.getElementById('num_count');#}
-{#    var plusBtn = document.getElementById('button_plus');#}
-{#    var minusBtn = document.getElementById('button_minus');#}
-{#    var maxElement = document.getElementById("num_count").getAttribute("max");#}
-{#    plusBtn.onclick = function () {#}
-{#        var qty = parseInt(numCount.value);#}
-{#        if (qty < maxElement) {#}
-{#            qty = qty + 1;#}
-{#        }#}
-{#        numCount.value = qty;#}
-{#    }#}
-{#    minusBtn.onclick = function () {#}
-{#        var qty = parseInt(numCount.value);#}
-{#        if (qty > 1) {#}
-{#            qty = qty - 1;#}
-{#        }#}
-{#        numCount.value = qty;#}
-{#    }#}
-{#</script>#}
+
 </html>
