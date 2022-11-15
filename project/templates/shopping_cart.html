@@ -3,23 +3,24 @@
 {% block content %}
     {% if message %}
         <div class="message">
-            <p>{{ message }}</p>
+            <p style="margin-bottom: 19%; margin-top: 13%">{{ message }}</p>
         </div>
     {% else %}
         <h1 class="message" style="color: rgba(0, 0, 0, .3)">Моя корзина</h1>
         {% include "product_short_view.html" %}
         <div class="total_sum">
-                <h1 class="text_sum" style="color: rgba(0, 0, 0, .3)">Итого: {{ total_price.sum }} ₽</h1>
+            <h1 class="text_sum" style="color: rgba(0, 0, 0, .3)">Итого: {{ total_price.sum }} ₽</h1>
             {% if not user %}
-                    <a type="submit" style="text-align: center" class="bottom_total" href="{{ url_for('checkout', products=products) }}">
-                        Оформить
-                        заказ
-                    </a>
-                {% else %}
-                    <a type="submit" style="text-align: center" class="bottom_total" href="{{ url_for('signup') }}">Оформить
-                        заказ
-                    </a>
-                {% endif %}
+                <a type="submit" style="text-align: center" class="bottom_total"
+                   href="{{ url_for('checkout', products=products) }}">
+                    Оформить
+                    заказ
+                </a>
+            {% else %}
+                <a type="submit" style="text-align: center" class="bottom_total" href="{{ url_for('signup') }}">Оформить
+                    заказ
+                </a>
+            {% endif %}
         </div>
     {% endif %}
 

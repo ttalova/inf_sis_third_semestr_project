@@ -10,20 +10,23 @@
         </div>
         <div class="container" style="color: rgba(0, 0, 0, 0.55);">
             <h1>Редактировать товар</h1><br>
-        {% if message %}
-            <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
-            <br>
-        {% endif %}
+            {% if message %}
+                <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
+                <br>
+            {% endif %}
             <hr>
             <br>
             <label for="name"><b>Название товара</b></label>
-            <input class="inpt" type="text" placeholder="Название товара" name="name" value="{{ product.name }}" required>
+            <input class="inpt" type="text" placeholder="Название товара" name="name" value="{{ product.name }}"
+                   required>
 
             <label for="short_description"><b>Краткое описание</b></label>
-            <input class="inpt" type="text" placeholder="Краткое описание" name="short_description" value="{{ product.short_description }}" required>
+            <input class="inpt" type="text" placeholder="Краткое описание" name="short_description"
+                   value="{{ product.short_description }}" required>
 
             <label for="description"><b>Описание</b></label>
-            <input class="inpt" type="text" placeholder="Краткое описание" name="description" value="{{ product.description }}" required>
+            <input class="inpt" type="text" placeholder="Описание" name="description" value="{{ product.description }}"
+                   required>
 
             <label for="price"><b>Цена</b></label>
             <input class="inpt" type="text" placeholder="Цена" name="price" value="{{ product.price }}" required>
@@ -31,7 +34,7 @@
             <label for="category"><b>Категория</b></label>
             <select class="inpt" name="category" required>
                 <option disabled>Категория</option>
-            <option value="0">Без изменений</option>
+                <option value="0">Без изменений</option>
                 {% for ct in category %}
                     <option value="{{ ct.id }}">{{ ct.name }}</option>
                 {% endfor %}
@@ -42,7 +45,7 @@
             <label for="brand"><b>Бренд</b></label>
             <select class="inpt" name="brand" required>
                 <option disabled>Бренд</option>
-            <option value="0">Без изменений</option>
+                <option value="0">Без изменений</option>
                 {% for br in brand %}
                     <option value="{{ br.id }}">{{ br.name }}</option>
                 {% endfor %}
@@ -52,23 +55,26 @@
             <label for="country"><b>Страна</b></label>
             <select class="inpt" name="country" required>
                 <option disabled>Страна</option>
-            <option value="0">Без изменений</option>
+                <option value="0">Без изменений</option>
                 {% for cr in country %}
                     <option value="{{ cr.id }}">{{ cr.name }}</option>
                 {% endfor %}
             </select><br>
 
 
-        <label for="weight"><b>Вес (мл.)</b></label>
-                <input class="inpt" type="text" name="weight" placeholder="Вес" value="{{ product.weight }}" required>
+            <label for="weight"><b>Вес (мл.)</b></label>
+            <input class="inpt" type="text" name="weight" placeholder="Вес" value="{{ product.weight }}" required
+                   min="1">
 
-       <label for="composition"><b>Состав</b></label>
-                <input class="inpt" type="text" name="composition" placeholder="Состав" value="{{ product.composition }}" required>
+            <label for="composition"><b>Состав</b></label>
+            <input class="inpt" type="text" name="composition" placeholder="Состав" value="{{ product.composition }}"
+                   required>
 
-        <label for="quantity"><b>Количество товара</b></label>
-                <input class="inpt" type="number" name="quantity" placeholder="Количество" value="{{ product.quantity }}"required>
+            <label for="quantity"><b>Количество товара</b></label>
+            <input class="inpt" type="number" name="quantity" placeholder="Количество" min="1"
+                   value="{{ product.quantity }}" required>
 
-        <button type="submit" class="bottom_total">Сохранить</button>
+            <button type="submit" class="bottom_total">Сохранить</button>
         </div>
     </form>
 {% endblock %}

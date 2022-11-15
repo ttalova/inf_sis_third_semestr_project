@@ -10,10 +10,10 @@
         </div>
         <div class="container" style="color: rgba(0, 0, 0, 0.55);">
             <h1>Добавить товар</h1><br>
-        {% if message %}
-            <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
-            <br>
-        {% endif %}
+            {% if message %}
+                <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
+                <br>
+            {% endif %}
             <hr>
             <br>
             <label for="name"><b>Название товара</b></label>
@@ -23,7 +23,7 @@
             <input class="inpt" type="text" placeholder="Краткое описание" name="short_description" required>
 
             <label for="description"><b>Описание</b></label>
-            <input class="inpt" type="text" placeholder="Краткое описание" name="description" required>
+            <input class="inpt" type="text" placeholder="Описание" name="description" required>
 
             <label for="price"><b>Цена</b></label>
             <input class="inpt" type="text" placeholder="Цена" name="price" required>
@@ -56,16 +56,16 @@
             </select><br>
 
 
-        <label for="weight"><b>Вес (мл.)</b></label>
-                <input class="inpt" type="text" name="weight" placeholder="Вес" required>
+            <label for="weight"><b>Вес (мл.)</b></label>
+            <input class="inpt" type="text" name="weight" placeholder="Вес" required>
 
-       <label for="composition"><b>Состав</b></label>
-                <input class="inpt" type="text" name="composition" placeholder="Состав" required>
+            <label for="composition"><b>Состав</b></label>
+            <input class="inpt" type="text" name="composition" placeholder="Состав" required>
 
-        <label for="quantity"><b>Количество товара</b></label>
-                <input class="inpt" type="number" name="quantity" placeholder="Количество" required>
+            <label for="quantity"><b>Количество товара</b></label>
+            <input class="inpt" type="number" name="quantity" placeholder="Количество" min="1" required>
 
-        <button type="submit" class="bottom_total">Сохранить</button>
+            <button type="submit" class="bottom_total">Сохранить</button>
         </div>
     </form>
 {% endblock %}

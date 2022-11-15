@@ -2,43 +2,43 @@
 
 {% block content %}
     <form method="POST">
-    <div class="preprofile" style="margin: 0px 10px;">
-        <a class="bottom_total" href="javascript:history.back()">
-            Назад
-        </a>
-        <br>
-    </div>
-    <div class="container" style="color: rgba(0, 0, 0, 0.55);">
-        <h1>{{ title }}</h1><br>
-        <hr>
-        <br>
-        <label for="name"><b>Имя</b></label>
-        <input class="inpt" type="text" placeholder="Ваше имя" name="name" value="{{ user_data.name }}" required>
-        <label for="gender"><b>Пол</b></label>
-        <select class="inpt" name="gender" required>
-            <option disabled>Пол</option>
-            {% if gender %}
-                <option value="Женский">Женский</option>
-                <option value="Мужской">Мужской</option>
-            {% else %}
-                <option value="Мужской">Мужской</option>
-                <option value="Женский">Женский</option>
-            {% endif %}
-        </select><br>
-        <label for="email"><b>Email</b></label>
-        <input class="inpt" value="{{ user_data.email }}" type="email" placeholder="Email" name="email" required>
+        <div class="preprofile" style="margin: 0px 10px;">
+            <a class="bottom_total" href="javascript:history.back()">
+                Назад
+            </a>
+            <br>
+        </div>
+        <div class="container" style="color: rgba(0, 0, 0, 0.55);">
+            <h1>{{ title }}</h1><br>
+            <hr>
+            <br>
+            <label for="name"><b>Имя</b></label>
+            <input class="inpt" type="text" placeholder="Ваше имя" name="name" value="{{ user_data.name }}" required>
+            <label for="gender"><b>Пол</b></label>
+            <select class="inpt" name="gender" required>
+                <option disabled>Пол</option>
+                {% if gender %}
+                    <option value="Женский">Женский</option>
+                    <option value="Мужской">Мужской</option>
+                {% else %}
+                    <option value="Мужской">Мужской</option>
+                    <option value="Женский">Женский</option>
+                {% endif %}
+            </select><br>
+            <label for="email"><b>Email</b></label>
+            <input class="inpt" value="{{ user_data.email }}" type="email" placeholder="Email" name="email" required>
 
-        <label for="password"><b>Пароль</b></label>
-        {% if title == 'Регистрация' %}
-            <input class="inpt" type="password" placeholder="Введите пароль" name="password" required>
-        {% else %}
-            <input class="inpt" type="password" placeholder="Введите пароль" name="password">
-        {% endif %}
-        <button type="submit" class="bottom_total" style="width: 70%; padding: 10px;">Сохранить</button>
-        <br>
-        {% if message %}
-            <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
-        {% endif %}
-    </div>
+            <label for="password"><b>Пароль</b></label>
+            {% if title == 'Регистрация' %}
+                <input class="inpt" type="password" placeholder="Введите пароль" name="password" required>
+            {% else %}
+                <input class="inpt" type="password" placeholder="Введите пароль" name="password">
+            {% endif %}
+            <button type="submit" class="bottom_total" style="width: 70%; padding: 10px;">Сохранить</button>
+            <br>
+            {% if message %}
+                <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
+            {% endif %}
+        </div>
     </form>
 {% endblock %}

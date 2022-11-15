@@ -1,3 +1,5 @@
+import random
+
 from flask import Flask, redirect, url_for, render_template, request, make_response, session
 
 import datetime
@@ -10,8 +12,13 @@ from werkzeug.utils import secure_filename
 import os
 
 from help_function import *
+
+import random
+
+
 def page_not_found(e):
     return render_template("error.html")
+
 
 UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -32,6 +39,7 @@ def index():
         session[session['email']] = {'favorites': [], 'shopping_cart': {}}
     session_modified()
     products = db.select(f"SELECT * FROM product")
+    day_product = random.choice(products)
     categories = db.select(f"SELECT * FROM category")
     search = ''
     products = isinstance_dict(products)
@@ -58,7 +66,8 @@ def index():
         'site': 'index',
         'admin': session['admin'],
         'category_selected': int(request.form.get('category')) if request.form.get('category') else '',
-        'indexx': 1
+        'indexx': 1,
+        'day_product': day_product
     }
     return render_template("index.html", **context)
 
@@ -102,7 +111,7 @@ def signup():
     content = {
         'message': message,
         'user': user_logining(),
-        'user_data': [{'name': '', 'email': '', 'gender':'', 'password':''}],
+        'user_data': [{'name': '', 'email': '', 'gender': '', 'password': ''}],
         'title': 'Регистрация'
     }
     return render_template("signup.html", **content)
@@ -270,7 +279,8 @@ def checkout():
 @app.route('/orders')
 def orders():
     user_in = db.select(f"SELECT id FROM mail_user WHERE email='{session['email']}'")['id']
-    products_list = db.select(f"SELECT order_data, order_time, total_price, product FROM user_order WHERE mail_user='{user_in}'")
+    products_list = db.select(
+        f"SELECT order_data, order_time, total_price, product FROM user_order WHERE mail_user='{user_in}' ORDER BY order_data DESC, order_time DESC")
     message = None
     if products_list:
         products = []
@@ -366,7 +376,7 @@ def add_product():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         db.insert(
             f"INSERT INTO product (name, short_description, description, price, category, image, brand, country, weight, composition, quantity, status) "
-            f"VALUES ('{request.form.get('name')}', '{request.form.get('short_description')}', '{request.form.get('description')}', {float(request.form.get('price'))}, {int(request.form.get('category'))}, '{filename}', {int(request.form.get('brand'))}, {int(request.form.get('country'))}, {float(request.form.get('weight'))}, '{request.form.get('composition')}', {int(request.form.get('quantity'))}, 'in')")
+            f"VALUES ('{request.form.get('name')}', '{request.form.get('short_description')}', '{request.form.get('description')}', {float(request.form.get('price').replace(' ', ''))}, {int(request.form.get('category'))}, '{filename}', {int(request.form.get('brand'))}, {int(request.form.get('country'))}, {float(request.form.get('weight').replace(' ', ''))}, '{request.form.get('composition')}', {int(request.form.get('quantity'))}, 'in')")
         message = 'Товар добавлен'
     context = {
         'admin': session['admin'],
@@ -396,10 +406,17 @@ def edit_product(product_id):
             filename = 0
         if filename:
             db.update(
-                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', description='{request.form.get('description')}', price={float(request.form.get('price'))}, category={int(category)}, image='{filename}', brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight'))}, composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
+                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}',"
+                f" description='{request.form.get('description')}', price={float(request.form.get('price').replace(' ', ''))}, "
+                f"category={int(category)}, image='{filename}', brand={int(brand)}, country={int(country)}, "
+                f"weight={float(request.form.get('weight').replace(' ', ''))}, composition='{request.form.get('composition')}',"
+                f" quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
         else:
             db.update(
-                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', description='{request.form.get('description')}', price={float(request.form.get('price'))}, category={int(category)}, brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight'))}, composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
+                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', "
+                f"description='{request.form.get('description')}', price={float(request.form.get('price').replace(' ', ''))}, "
+                f"category={int(category)}, brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight').replace(' ', ''))},"
+                f" composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
         message = 'Данные изменены'
         return redirect(url_for('get_product', message=message, product_id=product_id))
     context = {
@@ -419,11 +436,11 @@ def delete_product(product_id):
     db.update(f"UPDATE product SET status='delete' WHERE id={product_id}")
     return redirect(url_for('index'))
 
+
 @app.route('/cancel_delete_product, <int:product_id>', methods=['GET', 'POST'])
 def cancel_delete_product(product_id):
     db.update(f"UPDATE product SET status='in' WHERE id={product_id}")
     return redirect(url_for('get_product', product_id=product_id))
-
 
 
 if __name__ == '__main__':

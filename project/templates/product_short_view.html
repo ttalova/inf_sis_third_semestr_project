@@ -1,42 +1,46 @@
 {% block short_view %}
     <div class="base_cards">
-    {% if  products %}
-        {% for product, quanti in products %}
-            {% if product.status == 'in' or admin %}
-                <div class="card" style="height: 15%; width: 22%;">
-                    <div class="product-wrap">
-                        <div class="product-item">
-                            <img src="static/{{ product.image }}"
-                                 width="100%" height="auto" style="border-radius: 5px">
-                            <div class="product-buttons">
-                                {% if not orders_exist %}
-                                    {% if product.id not in exist.shopping_cart %}
-                                        <a href="{{ url_for('add_to_shopping_cart', product_id=product.id, site=site) }}"
-                                           class="button">В корзину</a>
-                                    {% else %}
-                                        <a href="{{ url_for('delete_from_shopping_cart', product_id=product.id, site=site) }}"
-                                           class="button">Убрать</a>
+        {% if  products %}
+            {% for product, quanti in products %}
+                {% if product.status == 'in' and product.quantity > 0 or admin %}
+                    <div class="card" style="height: 15%; width: 22%;">
+                        <div class="product-wrap">
+                            <div class="product-item">
+                                <img src="static/{{ product.image }}"
+                                     width="100%" height="auto" style="border-radius: 5px">
+                                <div class="product-buttons">
+                                    {% if not orders_exist %}
+                                        {% if product.id not in exist.shopping_cart %}
+                                            <a href="{{ url_for('add_to_shopping_cart', product_id=product.id, site=site) }}"
+                                               class="button">В корзину</a>
+                                        {% else %}
+                                            <a href="{{ url_for('delete_from_shopping_cart', product_id=product.id, site=site) }}"
+                                               class="button">Убрать</a>
+                                        {% endif %}
+                                        {% if product.id not in exist.favorites %}
+                                            <a href="{{ url_for('add_to_favorites', product_id=product.id, site=site) }}"
+                                               class="button_wishlist"><img src="/static/like_before.png"
+                                                                            style="height:100%; width:auto;"></a>
+                                        {% else %}
+                                            <a href="{{ url_for('delete_from_favorites', product_id=product.id, site=site) }}"
+                                               class="button_wishlist"><img src="/static/like_after.png"
+                                                                            style="height:100%; width:auto;"></a>
+                                        {% endif %}
+                                        </div>
+                                        </div>
+                                        <div class="product-title">
+                                            <a href="{{ url_for("get_product", product_id=product.id) }}">{{ product.name }}</a>
+                                            <span class="product-price">₽ {{ product.price }}</span>
+                                        </div>
+                                        </div>
                                     {% endif %}
-                                    {% if product.id not in exist.favorites %}
-                                        <a href="{{ url_for('add_to_favorites', product_id=product.id, site=site) }}"
-                                           class="button_wishlist"><img src="/static/like_before.png"
-                                                                        style="height:100%; width:auto;"></a>
-                                    {% else %}
-                                        <a href="{{ url_for('delete_from_favorites', product_id=product.id, site=site) }}"
-                                           class="button_wishlist"><img src="/static/like_after.png"
-                                                                        style="height:100%; width:auto;"></a>
-                                    {% endif %}
-                                    </div>
-                                    </div>
-                                    <div class="product-title">
-                                        <a href="{{ url_for("get_product", product_id=product.id) }}">{{ product.name }}</a>
-                                        <span class="product-price">₽ {{ product.price }}</span>
-                                    </div>
-                                    </div>
-                                {% endif %}
-                </div>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="message">
+                <p style="margin-bottom: 16%; margin-top: 13%">Товаров не найдено</p>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

@@ -3,11 +3,11 @@
 {% block content %}
     {% if message %}
         <div class="message">
-    <p>{{ message }}</p>
+            <p style="margin-bottom: 19%; margin-top: 13%">{{ message }}</p>
         </div>
     {% else %}
         <h1 class="message" style="color: rgba(0, 0, 0, .3)">Мой лист пожеланий</h1>
-    {% include "product_short_view.html" %}
+        {% include "product_short_view.html" %}
     {% endif %}
 {% endblock %}
 

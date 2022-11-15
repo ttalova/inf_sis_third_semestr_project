@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <a style="float: left; margin: 10px 20px; width: 70px; text-align: center; position: absolute" class="bottom_total" href="javascript:history.back()">Назад</a>
+    <a style="float: left; margin: 10px 20px; width: 70px; text-align: center; position: absolute" class="bottom_total"
+       href="javascript:history.back()">Назад</a>
     {% if message %}
         <small style="color: rgba(34, 34, 34, .2)">{{ message }}</small>
     {% endif %}
@@ -12,7 +13,7 @@
     {% else %}
         <p class="help">__________</p>
         <p class="image-product"><a><img src="/static/{{ product.image }}"
-                                         position="relative"; width="60%" height="auto" align="left"></a></p>
+                                         position="relative" ; width="60%" height="auto" align="left"></a></p>
         <h2 style="margin-top: -20px; font-size: 15px; position: absolute; left: 50%;">{{ product.short_description }}</h2>
         <br>
         <h1 style="margin-top: -10px; font-size: 40px; position: absolute; left: 50%;">{{ title }}</h1>
@@ -31,11 +32,11 @@
             {% if product.id not in exist.favorites %}
                 <a href="{{ url_for('add_to_favorites', product_id=product.id, site=site) }}"
                    class="like_base"><img src="/static/like_before.png"
-                                                style="margin-top: -2px; position: inherit; height:45px; width:auto;"></a>
+                                          style="margin-top: -2px; position: inherit; height:45px; width:auto;"></a>
             {% else %}
                 <a href="{{ url_for('delete_from_favorites', product_id=product.id, site=site) }}"
                    class="like_base"><img src="/static/like_after.png"
-                                                style="margin-top: -2px; position: inherit; height:45px; width:auto;"></a>
+                                          style="margin-top: -2px; position: inherit; height:45px; width:auto;"></a>
             {% endif %}
         </div>
         <br>
@@ -43,31 +44,32 @@
             <h3>Описание</h3>
             <p>{{ product.description }}</p>
             <br>
-        <div class="after-product">
-            <h3>Состав</h3>
-            <p>{{ product.composition }}</p>
-            <p>Количество в наличии: {{ product.quantity }}</p><br>
-            <hr><br>
-            <h3>Подробные характеристики</h3><br>
-            <p>Категория___________{{ category.name }}</p><br>
-            <p>Страна_____________{{ country.name }}</p><br>
-            <p>Бренд______________{{ brand.name }}</p><br>
-            <p>В наличии__________{{ product.quantity }} шт.</p><br>
-            <hr>
-        </div>
+            <div class="after-product">
+                <h3>Состав</h3>
+                <p>{{ product.composition }}</p>
+                <p>Количество в наличии: {{ product.quantity }}</p><br>
+                <hr>
+                <br>
+                <h3>Подробные характеристики</h3><br>
+                <p>Категория___________{{ category.name }}</p><br>
+                <p>Страна_____________{{ country.name }}</p><br>
+                <p>Бренд______________{{ brand.name }}</p><br>
+                <p>В наличии__________{{ product.quantity }} шт.</p><br>
+                <hr>
+            </div>
         </div>
         <div class="preprofile">
-        {% if admin %}
-            <a href="{{ url_for('edit_product', product_id=product.id) }}"
-               class="bottom_total" style="display: inline-block;">Редактировать</a>
-            {% if product.status == 'in' %}
-                <a href="{{ url_for('delete_product', product_id=product.id) }}"
-                   class="bottom_total" style="display: inline-block">Удалить</a>
-            {% else %}
-                <a href="{{ url_for('cancel_delete_product', product_id=product.id) }}"
-                   class="bottom_total" style="display: inline-block">Отменить удаление</a>
+            {% if admin %}
+                <a href="{{ url_for('edit_product', product_id=product.id) }}"
+                   class="bottom_total" style="display: inline-block;">Редактировать</a>
+                {% if product.status == 'in' %}
+                    <a href="{{ url_for('delete_product', product_id=product.id) }}"
+                       class="bottom_total" style="display: inline-block">Удалить</a>
+                {% else %}
+                    <a href="{{ url_for('cancel_delete_product', product_id=product.id) }}"
+                       class="bottom_total" style="display: inline-block">Отменить удаление</a>
+                {% endif %}
             {% endif %}
-        {% endif %}
         </div>
     {% endif %}
 {% endblock %}

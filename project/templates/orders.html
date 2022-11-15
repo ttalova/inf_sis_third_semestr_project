@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
     {% if message %}
-       <div class="message">
-            <p>{{ message }}</p>
+        <div class="message">
+            <p style="margin-bottom: 19%; margin-top: 13%">{{ message }}</p>
         </div>
     {% else %}
         <h1 class="message" style="color: rgba(0, 0, 0, .3)">Мои заказы</h1>
         {% for product, order_data, total_price in products %}
             <div class="order">
-            <h2 style="text-align: center; margin: 10px">{{ order_data }}</h2>
-            <hr style="width: 50%; margin: 0 25% 0 25%;">
-            {% for prod in product %}
-                <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=prod.id) }}'">
-                    <img src="/static/{{ prod.image }}"
-                                      width="15%" height="auto" align="left" >
-                    <div class="disc" >
-                    <p style="margin: 17px;">  {{ prod.name }}</p>
-                    <p style="margin: 17px">  {{ prod.short_description }}</p>
-                    <p style="margin-bottom: 0">  ₽ {{ prod.price }}</p>
-                </div>
-                </div>
-            {% endfor %}
+                <h2 style="text-align: center; margin: 10px">{{ order_data }}</h2>
+                <hr style="width: 50%; margin: 0 25% 0 25%;">
+                {% for prod in product %}
+                    <div class="sec" onclick="location.href = '{{ url_for("get_product", product_id=prod.id) }}'">
+                        <img src="/static/{{ prod.image }}"
+                             width="15%" height="auto" align="left">
+                        <div class="disc">
+                            <p style="margin: 17px;">  {{ prod.name }}</p>
+                            <p style="margin: 17px">  {{ prod.short_description }}</p>
+                            <p style="margin-bottom: 0"> ₽ {{ prod.price }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
                 <h1 class="text_sum" style="margin-left: -164px; padding-top: 0px">Итого: {{ total_price }} ₽</h1>
             </div>
         {% endfor %}
