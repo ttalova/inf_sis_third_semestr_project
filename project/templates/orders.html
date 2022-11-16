@@ -6,7 +6,7 @@
         </div>
     {% else %}
         <h1 class="message" style="color: rgba(0, 0, 0, .3)">Мои заказы</h1>
-        {% for product, order_data, total_price in products %}
+        {% for list, product, order_data, total_price in products %}
             <div class="order">
                 <h2 style="text-align: center; margin: 10px">{{ order_data }}</h2>
                 <hr style="width: 50%; margin: 0 25% 0 25%;">

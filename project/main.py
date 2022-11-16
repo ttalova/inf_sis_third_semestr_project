@@ -254,8 +254,10 @@ def checkout():
             print(products)
             products = isinstance_dict(products)
             products = [id['id'] for id in products]
-            db.insert(
-                f"INSERT INTO user_order (mail_user, order_data, order_time, total_price, product, first_name, second_name, third_name, city, adress) VALUES ('{user_email}', '{order_data}', '{order_data}', '{total_price}', '{products}', '{first_name}', '{second_name}', '{third_name}', '{city}', '{adress}')")
+            num_order = generate_password_hash(str(products) + str(random.randint(1, 100)))
+            for product in products:
+                db.insert(
+                    f"INSERT INTO user_order (mail_user, order_data, order_time, total_price, product, first_name, second_name, third_name, city, adress, num_order) VALUES ('{user_email}', '{order_data}', '{order_data}', '{total_price}', '{product}', '{first_name}', '{second_name}', '{third_name}', '{city}', '{adress}', '{num_order}')")
             products = db.select(f"SELECT * FROM product WHERE id IN {prods_shopping_cart()}")
             products = isinstance_dict(products)
             db.update(f"UPDATE product SET quantity=quantity - 1 WHERE id IN {prods_shopping_cart()} AND status='in'")
@@ -279,35 +281,37 @@ def checkout():
 @app.route('/orders')
 def orders():
     user_in = db.select(f"SELECT id FROM mail_user WHERE email='{session['email']}'")['id']
-    products_list = db.select(
-        f"SELECT order_data, order_time, total_price, product FROM user_order WHERE mail_user='{user_in}' ORDER BY order_data DESC, order_time DESC")
-    message = None
-    if products_list:
+    orders_list = db.select(f"SELECT num_order, mail_user FROM user_order WHERE mail_user='{user_in}' ORDER BY order_data DESC, order_time DESC")
+    if orders_list:
+        orders_list = (isinstance_dict(orders_list))
         products = []
+        orders_list = set([a['num_order'] for a in orders_list])
         order_datas = []
         total_prices = []
-        products_list = isinstance_dict(products_list)
-        for product_order in products_list:
-            order_data = product_order['order_data']
-            order_time = product_order['order_time']
-            total_price = product_order['total_price']
+        for orderr in orders_list:
+            products_list = db.select(
+                f"SELECT * FROM user_order WHERE mail_user='{user_in}' AND num_order='{orderr}' ORDER BY order_data DESC, order_time DESC ")
+            products_list = isinstance_dict(products_list)
+            products_list_in = [a['product'] for a in products_list]
+            middle = []
+            for pr in products_list_in:
+                middle.append(db.select(f"SELECT * FROM product WHERE id={pr}"))
+            products.append(middle)
+            order_data = products_list[0]['order_data']
+            order_time = products_list[0]['order_time']
+            total_price = products_list[0]['total_price']
             order_datas.append(str(order_data) + ' ' + str(order_time).split('.')[0][:-3])
             total_prices.append(str(total_price))
-            product_order = product_order['product'][1:-1].split(',')
-            products_from_bd = []
-            for product in product_order:
-                product = product
-                prods = db.select(f"SELECT * FROM product WHERE id='{product}'")
-                products_from_bd.append(prods)
-            products.append(products_from_bd)
+            message = None
     else:
         message = 'Вы еще ничего не заказали...'
         products = [None]
         order_datas = [None]
         total_prices = [None]
+        orders_list = [None]
     context = {
         'message': message,
-        'products': zip(products, order_datas, total_prices),
+        'products': zip(orders_list, products, order_datas, total_prices),
         'user': user_logining(),
         'admin': session['admin']
     }
@@ -374,10 +378,22 @@ def add_product():
         file = request.files['photo']
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        db.insert(
-            f"INSERT INTO product (name, short_description, description, price, category, image, brand, country, weight, composition, quantity, status) "
-            f"VALUES ('{request.form.get('name')}', '{request.form.get('short_description')}', '{request.form.get('description')}', {float(request.form.get('price').replace(' ', ''))}, {int(request.form.get('category'))}, '{filename}', {int(request.form.get('brand'))}, {int(request.form.get('country'))}, {float(request.form.get('weight').replace(' ', ''))}, '{request.form.get('composition')}', {int(request.form.get('quantity'))}, 'in')")
-        message = 'Товар добавлен'
+        try:
+            price = float(request.form.get('price').replace(' ', ''))
+        except:
+            price = -1
+        if price <= 0:
+            print(1)
+            message = 'Некорректные данные'
+        else:
+            try:
+                db.insert(
+                    f"INSERT INTO product (name, short_description, description, price, category, image, brand, country, weight, composition, quantity, status) "
+                    f"VALUES ('{request.form.get('name')}', '{request.form.get('short_description')}', '{request.form.get('description')}', {price}, {int(request.form.get('category'))}, '{filename}', {int(request.form.get('brand'))}, {int(request.form.get('country'))}, {float(request.form.get('weight').replace(' ', ''))}, '{request.form.get('composition')}', {int(request.form.get('quantity'))}, 'in')")
+                message = 'Товар добавлен'
+            except:
+                message = 'Некорректные данные'
+
     context = {
         'admin': session['admin'],
         'message': message,
@@ -397,27 +413,33 @@ def edit_product(product_id):
         brand = is_in_db(request.form.get('brand'), 'brand', product)
         country = is_in_db(request.form.get('country'), 'country', product)
         category = is_in_db(request.form.get('category'), 'category', product)
-        print(request.files)
         if 'file' in request.files:
             file = request.files['photo']
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         else:
             filename = 0
-        if filename:
-            db.update(
-                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}',"
-                f" description='{request.form.get('description')}', price={float(request.form.get('price').replace(' ', ''))}, "
-                f"category={int(category)}, image='{filename}', brand={int(brand)}, country={int(country)}, "
-                f"weight={float(request.form.get('weight').replace(' ', ''))}, composition='{request.form.get('composition')}',"
-                f" quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
+        try:
+            price = float(request.form.get('price').replace(' ', ''))
+        except:
+            price = -1
+        if price <= 0:
+            message = 'Некорректные данные'
         else:
-            db.update(
-                f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', "
-                f"description='{request.form.get('description')}', price={float(request.form.get('price').replace(' ', ''))}, "
-                f"category={int(category)}, brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight').replace(' ', ''))},"
-                f" composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
-        message = 'Данные изменены'
+            if filename:
+                db.update(
+                    f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}',"
+                    f" description='{request.form.get('description')}', price={price}, "
+                    f"category={int(category)}, image='{filename}', brand={int(brand)}, country={int(country)}, "
+                    f"weight={float(request.form.get('weight').replace(' ', ''))}, composition='{request.form.get('composition')}',"
+                    f" quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
+            else:
+                db.update(
+                    f"UPDATE product SET name='{request.form.get('name')}', short_description='{request.form.get('short_description')}', "
+                    f"description='{request.form.get('description')}', price={price}, "
+                    f"category={int(category)}, brand={int(brand)}, country={int(country)}, weight={float(request.form.get('weight').replace(' ', ''))},"
+                    f" composition='{request.form.get('composition')}', quantity={int(request.form.get('quantity'))} WHERE id={product_id}")
+            message = 'Данные изменены'
         return redirect(url_for('get_product', message=message, product_id=product_id))
     context = {
         'message': message,

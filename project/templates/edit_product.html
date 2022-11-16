@@ -63,7 +63,7 @@
 
 
             <label for="weight"><b>Вес (мл.)</b></label>
-            <input class="inpt" type="text" name="weight" placeholder="Вес" value="{{ product.weight }}" required
+            <input class="inpt" type="number" name="weight" placeholder="Вес" value="{{ product.weight }}" min="1" required
                    min="1">
 
             <label for="composition"><b>Состав</b></label>
