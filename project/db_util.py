@@ -1,20 +1,18 @@
 import psycopg2
+from secret import *
 
 
 class Database:
     def __init__(self):
-        # Соединение с СУБД
         self.con = psycopg2.connect(
-            dbname='cosmetics_store_db',
-            user='postgres',
-            password='123456789',
+            dbname=dbname,
+            user=user,
+            password=password,
             host='localhost',
             port=5432
         )
-        # Взаимодействие с базой осуществляется при помощи отдельного класса, cursor
         self.cur = self.con.cursor()
 
-    # заполнение таблицы
     def select(self, query):
         self.cur.execute(query)
         data = self.prepare_data(self.cur.fetchall())

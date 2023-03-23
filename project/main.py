@@ -11,9 +11,10 @@ from werkzeug.utils import secure_filename
 
 import os
 
-from help_function import *
+from help_functions import *
 
 import random
+from secret import secret_key
 
 
 def page_not_found(e):
@@ -24,7 +25,7 @@ UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__, static_folder='./static')
-app.secret_key = '111'
+app.secret_key = secret_key
 app.permanent_session_lifetime = datetime.timedelta(days=365)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.register_error_handler(404, page_not_found)
@@ -281,7 +282,8 @@ def checkout():
 @app.route('/orders')
 def orders():
     user_in = db.select(f"SELECT id FROM mail_user WHERE email='{session['email']}'")['id']
-    orders_list = db.select(f"SELECT num_order, mail_user FROM user_order WHERE mail_user='{user_in}' ORDER BY order_data DESC, order_time DESC")
+    orders_list = db.select(
+        f"SELECT num_order, mail_user FROM user_order WHERE mail_user='{user_in}' ORDER BY order_data DESC, order_time DESC")
     if orders_list:
         orders_list = (isinstance_dict(orders_list))
         products = []
